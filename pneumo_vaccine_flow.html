@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>肺炎球菌ワクチン 接種判定フロー</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #f0f4f8;
+    padding: 16px;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .page {
+    background: white;
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px 24px 16px;
+    border-radius: 4px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.1);
+  }
+
+  h1 {
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: .03em;
+    color: #1a2035;
+    border-bottom: 2.5px solid #1a2035;
+    padding-bottom: 6px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  h1 span.sub {
+    font-size: 10px;
+    font-weight: 500;
+    color: #e05a2b;
+    background: #fff3ee;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid #e05a2b;
+  }
+
+  .notice {
+    background: #fff8e6;
+    border-left: 3px solid #f0a500;
+    padding: 5px 10px;
+    font-size: 10px;
+    color: #7a5500;
+    margin-bottom: 10px;
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* ===== GRID LAYOUT ===== */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* ===== VACCINE CARD ===== */
+  .vcard {
+    border-radius: 6px;
+    border: 2px solid #ddd;
+    overflow: hidden;
+  }
+
+  .vcard-header {
+    padding: 7px 10px;
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: .02em;
+  }
+
+  .vcard.neum .vcard-header { background: #3b5998; color: white; }
+  .vcard.prev .vcard-header { background: #0d6e3d; color: white; }
+  .vcard.cap  .vcard-header { background: #7b2fbf; color: white; }
+
+  .vcard.neum { border-color: #3b5998; }
+  .vcard.prev { border-color: #0d6e3d; }
+  .vcard.cap  { border-color: #7b2fbf; }
+
+  .vcard-header .badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+  .badge-tei  { background: #ffe066; color: #333; }
+  .badge-jihi { background: rgba(255,255,255,.25); color: white; border: 1px solid rgba(255,255,255,.5); }
+  .badge-stop { background: #ff4d4d; color: white; }
+
+  .vcard-body { padding: 8px 10px; background: white; }
+
+  /* ===== FLOW STEPS ===== */
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .step:last-child { margin-bottom: 0; }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    margin-top: 1px;
+  }
+  .neum .step-num { background: #3b5998; }
+  .prev .step-num { background: #0d6e3d; }
+  .cap  .step-num { background: #7b2fbf; }
+
+  .step-body { flex: 1; }
+
+  .q { font-weight: 700; color: #1a2035; font-size: 10.5px; margin-bottom: 3px; }
+
+  .branch {
+    padding-left: 6px;
+    border-left: 2px solid #e0e0e0;
+    margin-left: 2px;
+  }
+
+  .yes, .no { display: flex; align-items: flex-start; gap: 4px; margin-bottom: 2px; }
+  .yn-label {
+    flex-shrink: 0;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-top: 1px;
+  }
+  .yes .yn-label { background: #d4edda; color: #1e6b3a; }
+  .no  .yn-label { background: #fde8e8; color: #9b2020; }
+  .yn-text { font-size: 10px; line-height: 1.45; color: #333; }
+
+  /* Result tags */
+  .result {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-weight: 700;
+    font-size: 9.5px;
+    padding: 2px 7px;
+    border-radius: 12px;
+    margin-top: 2px;
+  }
+  .r-tei   { background: #e8f5e9; color: #1b5e20; border: 1.5px solid #4caf50; }
+  .r-jihi  { background: #e8eaf6; color: #283593; border: 1.5px solid #5c6bc0; }
+  .r-ng    { background: #fce4ec; color: #880e4f; border: 1.5px solid #e91e63; }
+  .r-warn  { background: #fff8e1; color: #e65100; border: 1.5px solid #ffa726; }
+
+  .indent { padding-left: 14px; margin-top: 2px; }
+
+  /* ===== BOTTOM NOTES ===== */
+  .notes {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .note-box {
+    background: #f8f9fc;
+    border: 1px solid #dde3f0;
+    border-radius: 4px;
+    padding: 7px 10px;
+  }
+  .note-box h3 {
+    font-size: 10px;
+    font-weight: 700;
+    color: #3b5998;
+    margin-bottom: 4px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid #dde3f0;
+  }
+  .note-box ul { list-style: none; padding: 0; }
+  .note-box li {
+    font-size: 9.5px;
+    color: #444;
+    padding-left: 12px;
+    position: relative;
+    margin-bottom: 2px;
+  }
+  .note-box li::before { content: "・"; position: absolute; left: 0; color: #888; }
+
+  .highlist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: 2px;
+  }
+  .hl-tag {
+    background: #fef3e8;
+    border: 1px solid #f0a500;
+    color: #7a4400;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+
+  .footer-note {
+    text-align: right;
+    font-size: 9px;
+    color: #999;
+    margin-top: 8px;
+  }
+
+  /* ===== PRINT ===== */
+  @media print {
+    body { background: white; padding: 0; font-size: 10.5px; }
+    .page { box-shadow: none; padding: 10mm 12mm; max-width: 100%; }
+    @page { size: A4 landscape; margin: 8mm; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>
+    🫁 肺炎球菌ワクチン 接種可否・費用判定フロー
+    <span class="sub">⚠️ 2026年4月から定期接種ワクチンが変わります</span>
+  </h1>
+
+  <div class="notice">
+    【制度変更】定期接種ワクチン：2026年3月まで＝ニューモバックス → 2026年4月以降＝プレベナー20（PCV20）に変更。自己負担額は札幌市からの案内を確認。
+  </div>
+
+  <div class="grid">
+
+    <!-- ======== ニューモバックス ======== -->
+    <div class="vcard neum">
+      <div class="vcard-header">
+        ニューモバックス（PPSV23）
+        <span class="badge badge-tei">定期：〜2026/3</span>
+        <span class="badge badge-stop">4月〜廃止</span>
+      </div>
+      <div class="vcard-body">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="q">接種希望日は 2026年4月以降？</div>
+            <div class="branch">
+              <div class="yes"><span class="yn-label">YES</span>
+                <span class="yn-text">定期接種廃止のため<br>
+                  <span class="result r-ng">❌ 定期不可</span>
+                  <div class="indent">自費希望なら↓ステップ2へ</div>
+                </span>
+              </div>
+              <div class="no"><span class="yn-label">NO</span>
+                <span class="yn-text">（〜3/31）↓ステップ2へ</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="q">年齢：65歳（今年度）<br>または 60〜64歳ハイリスク？</div>
+            <div class="branch">
+              <div class="yes"><span class="yn-label">YES</span>
+                <span class="yn-text">↓ステップ3へ</span>
+              </div>
+              <div class="no"><span class="yn-label">NO</span>
+                <span class="yn-text">
+                  <span class="result r-ng">❌ 定期不可</span><br>
+                  <span style="font-size:9px;color:#666">自費も現在は非推奨（学会指針）</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="q">過去にニューモバックスを<br>接種したことがある？</div>
+            <div class="branch">
+              <div class="yes"><span class="yn-label">YES</span>
+                <span class="yn-text">
+                  <span class="result r-ng">❌ 定期不可（札幌市）</span>
+                  <div class="indent" style="margin-top:3px">
+                    ※5年経過していても対象外<br>
+                    自費再接種も副反応リスクあり・非推奨<br>
+                    <span style="color:#0d6e3d;font-weight:700">→ プレベナー/キャップバックスを検討</span>
+                  </div>
+                </span>
+              </div>
+              <div class="no"><span class="yn-label">NO</span>
+                <span class="yn-text">
+                  <span class="result r-tei">✅ 定期接種OK</span><br>
+                  <span style="font-size:9px;color:#555">自己負担あり（札幌市）</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======== プレベナー20 ======== -->
+    <div class="vcard prev">
+      <div class="vcard-header">
+        プレベナー20（PCV20）
+        <span class="badge badge-tei">定期：2026/4〜</span>
+        <span class="badge badge-jihi">〜3月は自費</span>
+      </div>
+      <div class="vcard-body">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="q">接種希望日は 2026年4月以降？</div>
+            <div class="branch">
+              <div class="yes"><span class="yn-label">YES</span>
+                <span class="yn-text">定期接種開始 → ステップ2へ</span>
+              </div>
+              <div class="no"><span class="yn-label">NO</span>
+                <span class="yn-text">
+                  <span class="result r-jihi">💰 自費のみ</span>
+                  <div class="indent">ステップ3（接種間隔）を確認</div>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="q">年齢：65歳（今年度）<br>または 60〜64歳ハイリスク？</div>
+            <div class="branch">
+              <div class="yes"><span class="yn-label">YES</span>
+                <span class="yn-text">
+                  <span class="result r-tei">✅ 定期接種候補</span>
+                  <div class="indent" style="margin-top:3px">
+                    ↓ステップ3（接種間隔）を確認<br>
+                    <span style="font-size:9px;color:#e05a2b">自己負担額：札幌市案内待ち（未定）</span>
+                  </div>
+                </span>
+              </div>
+              <div class="no"><span class="yn-label">NO</span>
+                <span class="yn-text">
+                  <span class="result r-jihi">💰 自費のみ</span>
+                  <div class="indent">↓ステップ3へ</div>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="q">過去に肺炎球菌ワクチン（種類問わず）<br>を接種したことがある？</div>
+            <div class="branch">
+              <div class="yes"><span class="yn-label">YES</span>
+                <span class="yn-text">
+                  前回から <strong>1年以上</strong>経過している？
+                  <div class="indent" style="margin-top:2px">
+                    <div class="yes"><span class="yn-label">YES</span>
+                      <span class="result r-tei" style="font-size:9px">✅ 接種可</span>
+                      <span style="font-size:9px;color:#555;margin-left:4px">（自費・定期どちらも可）</span>
+                    </div>
+                    <div class="no"><span class="yn-label">NO</span>
+                      <span class="result r-ng" style="font-size:9px">❌ 接種不可（1年未満）</span>
+                    </div>
+                  </div>
+                </span>
+              </div>
+              <div class="no"><span class="yn-label">NO</span>
+                <span class="result r-tei" style="font-size:9px">✅ 接種可（初回）</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======== キャップバックス ======== -->
+    <div class="vcard cap">
+      <div class="vcard-header">
+        キャップバックス（PCV21）
+        <span class="badge badge-jihi">常に自費</span>
+      </div>
+      <div class="vcard-body">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="q">対象年齢：15歳以上<br>（特にハイリスク・高齢者に推奨）</div>
+            <div class="branch">
+              <div class="yes"><span class="yn-label">YES</span>
+                <span class="yn-text">↓ステップ2へ</span>
+              </div>
+              <div class="no"><span class="yn-label">NO</span>
+                <span class="result r-ng">❌ 対象外</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="q">過去に肺炎球菌ワクチン（種類問わず）<br>を接種したことがある？</div>
+            <div class="branch">
+              <div class="yes"><span class="yn-label">YES</span>
+                <span class="yn-text">
+                  前回から <strong>1年以上</strong>経過している？
+                  <div class="indent" style="margin-top:2px">
+                    <div class="yes"><span class="yn-label">YES</span>
+                      <span class="result r-jihi" style="font-size:9px">💰 自費で接種可</span>
+                    </div>
+                    <div class="no"><span class="yn-label">NO</span>
+                      <span class="result r-ng" style="font-size:9px">❌ 接種不可</span>
+                    </div>
+                  </div>
+                </span>
+              </div>
+              <div class="no"><span class="yn-label">NO</span>
+                <span class="result r-jihi" style="font-size:9px">💰 自費で接種可（初回）</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="q" style="color:#7b2fbf">接種後の注意事項</div>
+            <div style="font-size:9.5px;color:#333;margin-top:3px;line-height:1.5">
+              ✅ 原則 <strong>1回接種で終了</strong>（再接種不要）<br>
+              ✅ ニューモバックスの5年毎再接種は不要になる<br>
+              <span class="result r-warn" style="margin-top:3px">⚠️ 費用目安：約14,000〜15,000円</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+
+  <!-- ===== BOTTOM NOTES ===== -->
+  <div class="notes">
+
+    <div class="note-box">
+      <h3>60〜64歳 ハイリスク対象（定期接種）</h3>
+      <div class="highlist">
+        <span class="hl-tag">心臓疾患</span>
+        <span class="hl-tag">腎臓疾患</span>
+        <span class="hl-tag">肝臓疾患</span>
+        <span class="hl-tag">呼吸器疾患</span>
+        <span class="hl-tag">糖尿病</span>
+        <span class="hl-tag">免疫機能障害</span>
+        <span class="hl-tag">脾臓摘出後</span>
+        <span class="hl-tag">身体障害者手帳1〜2級</span>
+        <span class="hl-tag">慢性腎不全（透析含む）</span>
+        <span class="hl-tag">ネフローゼ症候群</span>
+        <span class="hl-tag">血液・骨髄腫瘍</span>
+      </div>
+      <div style="font-size:9px;color:#888;margin-top:4px">※診断書または身体障害者手帳等で確認</div>
+    </div>
+
+    <div class="note-box" style="border-color:#7b2fbf; grid-column: span 2;">
+      <h3 style="color:#7b2fbf; border-color:#ddd;">💡 プレベナー20 vs キャップバックス どちらを選ぶ？</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; font-size:9.5px;">
+        <div style="background:#e8f5e9; border-radius:4px; padding:6px 8px;">
+          <div style="font-weight:700; color:#1b5e20; margin-bottom:3px;">✅ プレベナー20を選ぶ場合</div>
+          <div style="color:#333;">定期接種の助成を使いたい<br>（2026年4月〜、65歳または60〜64歳ハイリスク）<br>費用を抑えたい</div>
+        </div>
+        <div style="background:#ede7f6; border-radius:4px; padding:6px 8px;">
+          <div style="font-weight:700; color:#4a148c; margin-bottom:3px;">✅ キャップバックスを選ぶ場合</div>
+          <div style="color:#333;">費用より効果を優先したい<br>定期接種の助成を気にしない<br>→ カバー率が高く1回で完結</div>
+        </div>
+        <div style="background:#fff8e1; border-radius:4px; padding:6px 8px;">
+          <div style="font-weight:700; color:#e65100; margin-bottom:3px;">⚠️ 現時点での不確定要素</div>
+          <div style="color:#333;">キャップバックスは<strong>2026年秋に定期接種化</strong>の可能性あり（未確定）<br>急がなければ情勢を見てから判断するのも一手</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <h3>よくある受付NG・注意パターン</h3>
+      <ul>
+        <li>「ニューモバックスを昔打った」→ 札幌市定期接種は<strong>何年経っても不可</strong></li>
+        <li>「5年経ったからもう1回ニューモバックスを」→ 現在は<strong>再接種非推奨</strong>（学会）</li>
+        <li>「プレベナーを今すぐ定期で」→ <strong>4月以降</strong>でないと定期対象外</li>
+        <li>「キャップバックスを公費で」→ <strong>常に自費</strong>（現時点で定期接種なし）</li>
+        <li>半年前にワクチン接種済み → <strong>1年未満は接種不可</strong>（結合型ワクチン後）</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="footer-note">
+    札幌大通り内分泌クリニック ／ 2026年4月版　※4月以降の詳細は札幌市の公式案内で必ず確認してください
+  </div>
+
+</div>
+
+<script>
+  // Print button (optional)
+  document.addEventListener('keydown', e => {
+    if (e.key === 'p' && (e.ctrlKey || e.metaKey)) {
+      window.print();
+    }
+  });
+</script>
+</body>
+</html>

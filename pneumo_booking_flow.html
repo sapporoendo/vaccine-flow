@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>肺炎球菌ワクチン 予約確認</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #f0f5fb;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 16px 48px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .header .clinic {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  .header h1 {
+    font-size: 18px;
+    font-weight: 900;
+    color: #1a2a4a;
+  }
+  .header p {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+  }
+
+  /* ===== CARD ===== */
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px 20px;
+    box-shadow: 0 2px 16px rgba(0,0,0,.08);
+    display: none;
+    animation: fadeIn .25s ease;
+  }
+  .card.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== STEP INDICATOR ===== */
+  .step-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #aaa;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* ===== VACCINE SELECT ===== */
+  .vax-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .vax-btn {
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .15s;
+    background: white;
+  }
+  .vax-btn:hover { transform: translateY(-2px); }
+  .vax-btn .icon { font-size: 24px; margin-bottom: 4px; }
+  .vax-btn .name { font-size: 13px; font-weight: 700; }
+  .vax-btn .sub  { font-size: 9.5px; color: #888; margin-top: 2px; }
+  .vax-btn.prev { border-color: #0d6e3d; }
+  .vax-btn.prev:hover { background: #f0faf5; }
+  .vax-btn.cap  { border-color: #7b2fbf; }
+  .vax-btn.cap:hover  { background: #f7f0ff; }
+
+  /* ===== QUESTION ===== */
+  .question {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a2a4a;
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  .question-note {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .btn {
+    padding: 14px 10px;
+    border-radius: 10px;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-yes { background: #1a2a4a; color: white; }
+  .btn-no  { background: #f0f2f6; color: #555; }
+
+  .btn-full {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all .15s;
+  }
+  .btn-full:hover { transform: translateY(-2px); opacity: .9; }
+
+  /* ===== RESULT ===== */
+  .result-icon { font-size: 48px; text-align: center; margin-bottom: 8px; }
+  .result-title {
+    font-size: 18px;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .result-body {
+    font-size: 13px;
+    color: #444;
+    line-height: 1.7;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .result-ok   .result-title { color: #1b5e20; }
+  .result-ok   .result-icon::after { content: '✅'; }
+  .result-ng   .result-title { color: #c62828; }
+  .result-ng   .result-icon::after { content: '❌'; }
+  .result-warn .result-title { color: #e65100; }
+  .result-warn .result-icon::after { content: '⚠️'; }
+
+  .info-box {
+    background: #f8f9fc;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 11.5px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    border-left: 3px solid #5c6bc0;
+  }
+  .info-box.green { border-color: #4caf50; }
+  .info-box.orange { border-color: #ffa726; }
+  .info-box.red { border-color: #e57373; }
+
+  .btn-book   { background: #1a2a4a; color: white; }
+  .btn-reset  { background: #f0f2f6; color: #555; font-size: 13px; }
+
+  /* ===== BACK ===== */
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 12px;
+    color: #999;
+    cursor: pointer;
+    margin-bottom: 12px;
+    padding: 0;
+  }
+  .back-btn:hover { color: #555; }
+
+  /* ===== PROGRESS ===== */
+  .progress {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+  .prog-dot {
+    height: 4px;
+    border-radius: 2px;
+    flex: 1;
+    background: #e0e0e0;
+    transition: background .3s;
+  }
+  .prog-dot.done { background: #1a2a4a; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="clinic">札幌大通り内分泌クリニック</div>
+    <h1>🫁 肺炎球菌ワクチン</h1>
+    <p>接種前の確認フロー</p>
+  </div>
+
+  <!-- ===== STEP 0: ワクチン選択 ===== -->
+  <div class="card active" id="s0">
+    <div class="step-label">ステップ 1 / ワクチンを選んでください</div>
+    <div class="question">どのワクチンをご希望ですか？</div>
+    <div class="question-note">わからない場合は受付にご相談ください。</div>
+    <div class="vax-grid">
+      <div class="vax-btn prev" onclick="choose('prev')">
+        <div class="icon">💉</div>
+        <div class="name">プレベナー20</div>
+        <div class="sub">PCV20<br>2026年4月〜定期接種</div>
+      </div>
+      <div class="vax-btn cap" onclick="choose('cap')">
+        <div class="icon">💉</div>
+        <div class="name">キャップバックス</div>
+        <div class="sub">PCV21・自費<br>カバー率が高い新ワクチン</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PREV: Q1 今年度65歳？ ===== -->
+  <div class="card" id="prev_q1">
+    <button class="back-btn" onclick="go('s0')">← 戻る</button>
+    <div class="progress">
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+      <div class="prog-dot"></div>
+      <div class="prog-dot"></div>
+    </div>
+    <div class="step-label">プレベナー20 確認 1</div>
+    <div class="question">今年度（2026年度）に<br>65歳になりますか？</div>
+    <div class="question-note">1961年4月2日〜1962年4月1日生まれの方が対象です。</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="go('prev_q3')">はい</button>
+      <button class="btn btn-no"  onclick="go('prev_q2')">いいえ</button>
+    </div>
+  </div>
+
+  <!-- ===== PREV: Q2 ハイリスク？ ===== -->
+  <div class="card" id="prev_q2">
+    <button class="back-btn" onclick="go('prev_q1')">← 戻る</button>
+    <div class="progress">
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+      <div class="prog-dot"></div>
+    </div>
+    <div class="step-label">プレベナー20 確認 2</div>
+    <div class="question">60〜64歳で、心臓・腎臓・肝臓・呼吸器の疾患、糖尿病、免疫機能障害などの基礎疾患がありますか？</div>
+    <div class="question-note">身体障害者手帳1〜2級の方も含みます。</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="go('prev_q3')">はい</button>
+      <button class="btn btn-no"  onclick="go('prev_ng_age')">いいえ</button>
+    </div>
+  </div>
+
+  <!-- ===== PREV: Q3 過去接種歴・1年経過？ ===== -->
+  <div class="card" id="prev_q3">
+    <button class="back-btn" onclick="go('prev_q1')">← 戻る</button>
+    <div class="progress">
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+    </div>
+    <div class="step-label">プレベナー20 確認 3</div>
+    <div class="question">過去に肺炎球菌ワクチンを<br>接種したことがありますか？</div>
+    <div class="question-note">ニューモバックス・プレベナー・キャップバックス等、種類は問いません。</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="go('prev_q4')">はい（接種歴あり）</button>
+      <button class="btn btn-no"  onclick="go('prev_ok')">いいえ（初めて）</button>
+    </div>
+  </div>
+
+  <!-- ===== PREV: Q4 1年以上経過？ ===== -->
+  <div class="card" id="prev_q4">
+    <button class="back-btn" onclick="go('prev_q3')">← 戻る</button>
+    <div class="progress">
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+    </div>
+    <div class="step-label">プレベナー20 確認 4</div>
+    <div class="question">前回の接種から<br>1年以上経ちましたか？</div>
+    <div class="question-note">接種日が不明な場合は、お手元の母子手帳や接種記録をご確認ください。</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="go('prev_ok')">はい（1年以上）</button>
+      <button class="btn btn-no"  onclick="go('prev_ng_interval')">いいえ（1年未満）</button>
+    </div>
+  </div>
+
+  <!-- ===== CAP: Q1 15歳以上？ ===== -->
+  <div class="card" id="cap_q1">
+    <button class="back-btn" onclick="go('s0')">← 戻る</button>
+    <div class="progress">
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+      <div class="prog-dot"></div>
+    </div>
+    <div class="step-label">キャップバックス 確認 1</div>
+    <div class="question">現在、15歳以上ですか？</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="go('cap_q2')">はい</button>
+      <button class="btn btn-no"  onclick="go('cap_ng_age')">いいえ</button>
+    </div>
+  </div>
+
+  <!-- ===== CAP: Q2 接種歴？ ===== -->
+  <div class="card" id="cap_q2">
+    <button class="back-btn" onclick="go('cap_q1')">← 戻る</button>
+    <div class="progress">
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+    </div>
+    <div class="step-label">キャップバックス 確認 2</div>
+    <div class="question">過去に肺炎球菌ワクチンを<br>接種したことがありますか？</div>
+    <div class="question-note">種類は問いません。</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="go('cap_q3')">はい（接種歴あり）</button>
+      <button class="btn btn-no"  onclick="go('cap_ok')">いいえ（初めて）</button>
+    </div>
+  </div>
+
+  <!-- ===== CAP: Q3 1年以上？ ===== -->
+  <div class="card" id="cap_q3">
+    <button class="back-btn" onclick="go('cap_q2')">← 戻る</button>
+    <div class="progress">
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+      <div class="prog-dot done"></div>
+    </div>
+    <div class="step-label">キャップバックス 確認 3</div>
+    <div class="question">前回の接種から<br>1年以上経ちましたか？</div>
+    <div class="btn-row">
+      <button class="btn btn-yes" onclick="go('cap_ok')">はい（1年以上）</button>
+      <button class="btn btn-no"  onclick="go('cap_ng_interval')">いいえ（1年未満）</button>
+    </div>
+  </div>
+
+  <!-- ===== RESULTS ===== -->
+
+  <!-- プレベナー OK（定期対象） -->
+  <div class="card result-ok" id="prev_ok">
+    <button class="back-btn" onclick="go('prev_q3')">← 戻る</button>
+    <div class="result-icon"></div>
+    <div class="result-title">予約に進めます</div>
+    <div class="result-body">プレベナー20の接種対象です。</div>
+    <div class="info-box green">
+      <strong>💰 費用について</strong><br>
+      65歳または60〜64歳ハイリスクの方は、<strong>札幌市の助成（定期接種）</strong>が適用されます。<br>
+      自己負担額は予約後にご案内します。
+    </div>
+    <button class="btn-full btn-book" onclick="alert('予約システムへ遷移します')">このまま予約に進む →</button>
+    <button class="btn-full btn-reset" onclick="reset()">最初からやり直す</button>
+  </div>
+
+  <!-- プレベナー NG：年齢対象外 -->
+  <div class="card result-ng" id="prev_ng_age">
+    <button class="back-btn" onclick="go('prev_q2')">← 戻る</button>
+    <div class="result-icon"></div>
+    <div class="result-title">定期接種の対象外です</div>
+    <div class="result-body">プレベナー20の定期接種は<br>65歳または60〜64歳ハイリスクの方が対象です。</div>
+    <div class="info-box orange">
+      <strong>💡 自費での接種について</strong><br>
+      対象年齢外でも自費接種は可能です。<br>また、カバー率がより高い<strong>キャップバックス（自費）</strong>もご検討ください。<br>
+      ご不明な点はお電話でご相談ください。
+    </div>
+    <button class="btn-full btn-reset" onclick="reset()">最初からやり直す</button>
+  </div>
+
+  <!-- プレベナー NG：接種間隔 -->
+  <div class="card result-ng" id="prev_ng_interval">
+    <button class="back-btn" onclick="go('prev_q4')">← 戻る</button>
+    <div class="result-icon"></div>
+    <div class="result-title">まだ接種できません</div>
+    <div class="result-body">前回の接種から1年以上経過していないと接種できません。</div>
+    <div class="info-box red">
+      前回の接種日から<strong>1年後以降</strong>に改めてご予約ください。<br>
+      接種日が不明な場合は受付にご相談ください。
+    </div>
+    <button class="btn-full btn-reset" onclick="reset()">最初からやり直す</button>
+  </div>
+
+  <!-- キャップバックス OK -->
+  <div class="card result-ok" id="cap_ok">
+    <button class="back-btn" onclick="go('cap_q2')">← 戻る</button>
+    <div class="result-icon"></div>
+    <div class="result-title">予約に進めます</div>
+    <div class="result-body">キャップバックスの接種対象です。</div>
+    <div class="info-box" style="border-color:#7b2fbf;">
+      <strong>💰 費用について（自費）</strong><br>
+      キャップバックスは現在<strong>全額自費</strong>です。<br>
+      費用目安：約14,000〜15,000円<br>
+      <span style="color:#888;font-size:10.5px">※原則1回接種で終了です。</span>
+    </div>
+    <button class="btn-full btn-book" onclick="alert('予約システムへ遷移します')" style="background:#7b2fbf;">このまま予約に進む →</button>
+    <button class="btn-full btn-reset" onclick="reset()">最初からやり直す</button>
+  </div>
+
+  <!-- キャップバックス NG：年齢 -->
+  <div class="card result-ng" id="cap_ng_age">
+    <button class="back-btn" onclick="go('cap_q1')">← 戻る</button>
+    <div class="result-icon"></div>
+    <div class="result-title">接種対象外です</div>
+    <div class="result-body">キャップバックスは15歳以上の方が対象です。</div>
+    <div class="info-box red">ご不明な点はお電話にてご相談ください。</div>
+    <button class="btn-full btn-reset" onclick="reset()">最初からやり直す</button>
+  </div>
+
+  <!-- キャップバックス NG：接種間隔 -->
+  <div class="card result-ng" id="cap_ng_interval">
+    <button class="back-btn" onclick="go('cap_q3')">← 戻る</button>
+    <div class="result-icon"></div>
+    <div class="result-title">まだ接種できません</div>
+    <div class="result-body">前回の接種から1年以上経過していないと接種できません。</div>
+    <div class="info-box red">
+      前回の接種日から<strong>1年後以降</strong>に改めてご予約ください。<br>
+      接種日が不明な場合は受付にご相談ください。
+    </div>
+    <button class="btn-full btn-reset" onclick="reset()">最初からやり直す</button>
+  </div>
+
+</div>
+
+<script>
+  function go(id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function choose(type) {
+    if (type === 'prev') go('prev_q1');
+    if (type === 'cap')  go('cap_q1');
+  }
+
+  function reset() {
+    go('s0');
+  }
+</script>
+</body>
+</html>
