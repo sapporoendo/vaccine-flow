@@ -317,7 +317,7 @@
     </div>
   </div>
 
-  <!-- ===== CAP: Q1 15歳以上？ ===== -->
+  <!-- ===== CAP: Q1 高齢者・ハイリスク？ ===== -->
   <div class="card" id="cap_q1">
     <button class="back-btn" onclick="go('s0')">← 戻る</button>
     <div class="progress">
@@ -326,7 +326,8 @@
       <div class="prog-dot"></div>
     </div>
     <div class="step-label">キャップバックス 確認 1</div>
-    <div class="question">現在、15歳以上ですか？</div>
+    <div class="question">65歳以上、または心臓・腎臓・呼吸器疾患、糖尿病などの基礎疾患がありますか？</div>
+    <div class="question-note">肺炎球菌感染症のリスクが高い方を対象としています。</div>
     <div class="btn-row">
       <button class="btn btn-yes" onclick="go('cap_q2')">はい</button>
       <button class="btn btn-no"  onclick="go('cap_ng_age')">いいえ</button>
@@ -426,12 +427,12 @@
     <button class="btn-full btn-reset" onclick="reset()">最初からやり直す</button>
   </div>
 
-  <!-- キャップバックス NG：年齢 -->
+  <!-- キャップバックス NG：対象外 -->
   <div class="card result-ng" id="cap_ng_age">
     <button class="back-btn" onclick="go('cap_q1')">← 戻る</button>
     <div class="result-icon"></div>
     <div class="result-title">接種対象外です</div>
-    <div class="result-body">キャップバックスは15歳以上の方が対象です。</div>
+    <div class="result-body">キャップバックスは高齢者または基礎疾患のある方を対象としています。</div>
     <div class="info-box red">ご不明な点はお電話にてご相談ください。</div>
     <button class="btn-full btn-reset" onclick="reset()">最初からやり直す</button>
   </div>
