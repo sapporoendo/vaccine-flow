@@ -350,7 +350,7 @@
         <div class="step">
           <div class="step-num">2</div>
           <div class="step-body">
-            <div class="q">年齢：65歳（今年度）<br>または 60〜64歳ハイリスク？</div>
+            <div class="q">札幌市民（または原発避難者）で、<br><strong>接種日時点</strong>で65歳？<br>または 60〜64歳ハイリスク？</div>
             <div class="branch">
               <div class="yes"><span class="yn-label">YES</span>
                 <span class="yn-text">
@@ -364,8 +364,10 @@
               </div>
               <div class="no"><span class="yn-label">NO</span>
                 <span class="yn-text">
-                  <span class="result r-jihi">💰 自費のみ</span>
-                  <div class="indent">↓ステップ3へ</div>
+                  <span class="result r-ng">❌ プレベナーは対象外</span>
+                  <div class="indent" style="margin-top:2px">
+                    <span style="color:#7b2fbf;font-weight:700">→ キャップバックス（自費）を検討</span>
+                  </div>
                 </span>
               </div>
             </div>
@@ -382,8 +384,11 @@
                   前回から <strong>1年以上</strong>経過している？
                   <div class="indent" style="margin-top:2px">
                     <div class="yes"><span class="yn-label">YES</span>
-                      <span class="result r-tei" style="font-size:9px">✅ 接種可</span>
-                      <span style="font-size:9px;color:#555;margin-left:4px">（自費・定期どちらも可）</span>
+                      <span class="result r-tei" style="font-size:9px">✅ 定期接種可</span>
+                      <div class="indent" style="margin-top:2px;font-size:9px;color:#555">
+                        ※自費でのプレベナーは非対象<br>
+                        <span style="color:#7b2fbf;font-weight:700">自費希望 → キャップバックスへ</span>
+                      </div>
                     </div>
                     <div class="no"><span class="yn-label">NO</span>
                       <span class="result r-ng" style="font-size:9px">❌ 接種不可（1年未満）</span>
@@ -412,7 +417,7 @@
         <div class="step">
           <div class="step-num">1</div>
           <div class="step-body">
-            <div class="q">対象年齢：15歳以上<br>（特にハイリスク・高齢者に推奨）</div>
+            <div class="q">65歳以上、または心臓・じん臓・呼吸器疾患、HIV免疫機能障害などのハイリスクな方？</div>
             <div class="branch">
               <div class="yes"><span class="yn-label">YES</span>
                 <span class="yn-text">↓ステップ2へ</span>
@@ -503,7 +508,7 @@
     <div class="note-box">
       <h3>よくある受付NG・注意パターン</h3>
       <ul>
-        <li>「ニューモバックスを昔打った」→ 札幌市定期接種は<strong>何年経っても不可</strong></li>
+        <li>「ニューモバックスを昔打った」→ 前回から<strong>1年以上</strong>経過 かつ <strong>Dr が必要と判断</strong>した場合のみプレベナー20（定期）またはキャップバックス可。Dr が不要と判断→<strong>不可</strong></li>
         <li>「5年経ったからもう1回ニューモバックスを」→ 現在は<strong>再接種非推奨</strong>（学会）</li>
         <li>「プレベナーを今すぐ定期で」→ <strong>4月以降</strong>でないと定期対象外</li>
         <li>「キャップバックスを公費で」→ <strong>常に自費</strong>（現時点で定期接種なし）</li>
